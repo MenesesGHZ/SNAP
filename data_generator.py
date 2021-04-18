@@ -7,9 +7,10 @@ PINK_CONTINUES = ((100,20,100),(255,105,180))
 PINK_DISCRETE = (255,102,204) 
 SEED_RANGE = (0, np.iinfo(np.int32).max)
 RANGE_SIZE = {"main":(80,250),"scatter":(5,25)}
-
+NOISE_COLORS = ((0,0,0),(0,0,255),(0,255,00),(255,0,0))
+ 
     
-def generate(samples):
+def generator(samples):
     # defining an empty dataset 
     w,h,c = IMAGE_SHAPE
     x_samples = np.zeros(shape=(w,h,c,samples))
@@ -49,23 +50,27 @@ def make_sample(figure,noise,main_color,background_color=(255,255,255)):
 def add_scatter_noise(image,seed):
     set_seed(seed)
     for i in range(np.random.randint(10,50)):
-        color = get_outer_color()
+        color = NOISE_COLORS[np.random.randint(0,len(NOISE_COLORS))]
         image = add_circle(image,color,RANGE_SIZE["scatter"])
         image = add_rectangle(image,color,RANGE_SIZE["scatter"])
     return image
 
-
 # defining figure functions
 def add_circle(image,color,range_size):
     radius = np.random.randint(*range_size)
-    coords = ( np.random.randint(0,IMAGE_SHAPE[0]), np.random.randint(0,IMAGE_SHAPE[1]) )
+    coords = ( np.random.randint(0,IMAGE_SHAPE[1]), np.random.randint(0,IMAGE_SHAPE[0]) )
     return cv.circle(image,coords, radius, color, -1)
 
 def add_rectangle(image,color,range_size):
     x,y = np.random.randint(*range_size,size=2) 
-    start_p = ( np.random.randint(0,IMAGE_SHAPE[0]) - x , np.random.randint(0,IMAGE_SHAPE[1]) - y )
+    start_p = ( np.random.randint(0,IMAGE_SHAPE[1]) - x , np.random.randint(0,IMAGE_SHAPE[0]) - y )
     end_p = (start_p[0] + x, start_p[1] + y )
     return cv.rectangle(image, start_p, end_p, color, -1)
+
+def add_mix_figures(image,color,range_size):
+    image = add_circle(image,color,range_size)
+    image = add_rectangle(image,color,range_size)
+    return image
 
 # set numpy random seed
 def set_seed(seed):
@@ -86,23 +91,11 @@ def get_outer_color():
     r,g,b = np.random.randint(*r), np.random.randint(*g), np.random.randint(*b)
     return (r,g,b)
 
-#def add_lines_noise(image,seed):
-#    set_seed(seed)
-#
-#def add_mix_noise(image,seed):
-#    set_seed(seed)
-
-
 FIGURES = {"rectangle":add_rectangle,
            "circle":add_circle,
-           #"triangle":"",
-           #"mix":""
-           }
+           "mix":add_mix_figures}
 
 NOISES = {"nothing":(lambda image,*args,**kwargs: image),
           "scatter":add_scatter_noise
-          #"lines":add_lines_noise
           #"mix": add_mix_noise
           }
-
-generate(8)
