@@ -12,9 +12,9 @@ NOISE_COLORS = ((0,0,0),(0,0,255),(0,255,00),(255,0,0))
     
 def generator(samples):
     # defining an empty dataset 
-    w,h,c = IMAGE_SHAPE
-    x_samples = np.zeros(shape=(w,h,c,samples))
-    y_samples = x_samples.copy()    
+   # w,h,c = IMAGE_SHAPE
+   # x_samples = np.zeros(shape=(w,h,c,samples))
+   # y_samples = x_samples.copy()    
     # figures and noises attributes
     fig_len,noises_len = len(FIGURES),len(NOISES)
     fig_list,noises_list = list(FIGURES.keys()), list(NOISES.keys())
@@ -99,3 +99,18 @@ NOISES = {"nothing":(lambda image,*args,**kwargs: image),
           "scatter":add_scatter_noise
           #"mix": add_mix_noise
           }
+
+def load_dataset(samples:int):
+    x = np.zeros(shape=(samples,*IMAGE_SHAPE))
+    y = np.zeros(shape=(samples,*IMAGE_SHAPE))
+    for i in range(samples):
+        x[i,:,:,:] = cv.imread(f"data/generated/x/{i}.png")
+        y[i,:,:,:] = cv.imread(f"data/generated/y/{i}.png")
+
+    # splitting train set
+    x_train = x[:int((len(x))*0.9)]
+    y_train = y[:int((len(y))*0.9)]
+    # splitting test set
+    x_test = x[int((len(x))*0.9):]
+    y_test = y[int((len(y))*0.9):]
+    return (x_train,y_train),(x_test,y_test)
